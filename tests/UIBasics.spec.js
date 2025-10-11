@@ -21,7 +21,7 @@ test('Validate Incorrect Login Error',async ({browser}) => {
     await page.locator('[name="password"]').fill('learning');
     await page.locator('#signInBtn').click();
     console.log(await page.locator('[style*="block"]').textContent());
-    expect(await page.locator('[style*="block"]').textContent()).toContain('Incorrect username/password.');
+    await expect(page.locator('[style*="block"]')).toContain('Incorrect username/password.');
 });
 
 test.only('Validate Empty User Name Login Error',async ({browser}) => {
@@ -32,5 +32,5 @@ test.only('Validate Empty User Name Login Error',async ({browser}) => {
     await page.locator('[name="password"]').fill('learning');
     await page.locator('#signInBtn').click();
     console.log(await page.locator('[style*="block"]').textContent());
-    expect(await page.locator('[style*="block"]').textContent()).toContain('Empty username/password.');
+    await expect(page.locator('[style*="block"]')).toContainText('Empty username/password.');
 });
