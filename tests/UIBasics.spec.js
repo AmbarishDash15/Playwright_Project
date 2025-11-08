@@ -25,7 +25,7 @@ test('Validate Incorrect Login Error',async ({browser}) => {
 });
 
 test('Validate Empty User Name Login Error',async ({page}) => {
-        await page.goto('http://www.rahulshettyacademy.com/loginpagePractise/');
+    await page.goto('http://www.rahulshettyacademy.com/loginpagePractise/');
     await page.locator('#username').fill('');
     await page.locator('[name="password"]').fill('learning');
     await page.locator('#signInBtn').click();
@@ -42,7 +42,7 @@ test('Get Login Credentials from page',async ({page}) => {
     await console.log('User Name : '+userName+' and Password : '+passWord)
 });
 
-test.only('Interact Login page UI elements',async ({page}) => {
+test('Interact Login page UI elements',async ({page}) => {
     const userNameField = page.locator('#username');
     const passwordField = page.locator('[name="password"]');
     const signInButton = page.locator('#signInBtn');
@@ -83,6 +83,24 @@ test('Get Login Credentials from page and Login',async ({page}) => {
     await expect(page.locator('div.container > a.navbar-brand')).toBeVisible();
     //await cardTitles.first().waitFor();
     //console.log(await cardTitles.allTextContents());
+});
+
+test.only('Child window interaction',async ({browser}) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const linkDoc = page.locator('[href*="documents-request"]');
+    await page.goto('http://www.rahulshettyacademy.com/loginpagePractise/');
+    await page.waitForLoadState('networkidle');
+    const [newPage] = await Promise.all([
+        context.waitForEvent('page'),
+        linkDoc.click(),
+    ])
+    const emailText = await newPage.locator('p.red').textContent();
+    const username = await (emailText.split('@')[1]).split('.')[0];
+    //await page.bringToFront();
+    await page.locator('#username').fill(username);
+    console.log(await page.locator('#username').inputValue());
+
 });
 
 
