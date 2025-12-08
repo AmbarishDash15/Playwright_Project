@@ -13,11 +13,7 @@ const { config } = require('process');
  */
 module.exports = defineConfig({
   testDir: './tests',
-<<<<<<< Updated upstream
-  timeout: 120*1000,
-=======
   timeout: 80*1000,
->>>>>>> Stashed changes
   expect: {
     timeout: 10*1000,
   },
