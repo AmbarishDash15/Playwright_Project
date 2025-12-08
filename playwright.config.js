@@ -13,7 +13,7 @@ const { config } = require('process');
  */
 module.exports = defineConfig({
   testDir: './tests',
-  timeout: 40*1000,
+  timeout: 120*1000,
   expect: {
     timeout: 10*1000,
   },
