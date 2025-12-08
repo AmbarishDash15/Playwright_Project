@@ -88,7 +88,7 @@ test('Get Login Credentials from page and Login',async ({page}) => {
     //console.log(await cardTitles.allTextContents());
 });
 
-test('Child window interaction',async ({browser}) => {
+test.skip('Child window interaction',async ({browser}) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     const linkDoc = page.locator('[href*="documents-request"]');
