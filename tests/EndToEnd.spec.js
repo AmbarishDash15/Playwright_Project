@@ -95,7 +95,7 @@ test('End to End Client App',async({browser}) => {
     //Go to Orders page and verify order
     await ordersBtn.click();
     await page.waitForLoadState('networkidle');
-    expect(await page.locator('h1.ng-star-inserted')).toContainText('Your Orders');
+    expect(await page.locator('h1.ng-star-inserted').textContent()).toContain('Your Orders');
     const orderRows = page.locator('tr.ng-star-inserted');
     const orderCount = await orderRows.count();
     //Search for orders based on ORDER ID in table and click on Order details
