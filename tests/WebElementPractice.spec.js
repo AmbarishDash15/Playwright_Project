@@ -1,8 +1,7 @@
-const {test, expect} = require('@playwright/test')
+const {test, expect} = require('@playwright/test');
+const { assert } = require('console');
 
-test('Interact elements on Practice Page',async({browser}) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+test('Interact elements on Practice Page',async({page}) => {
     await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
     //radio button
     const radioBtn1 = page.locator('[value="radio1"]');
@@ -40,6 +39,12 @@ test('Interact elements on Practice Page',async({browser}) => {
     await chkBxOpn2.click();
     expect(await chkBxOpn1.isChecked()).toBeTruthy();
     await expect(chkBxOpn2).toBeChecked();
+})
+
+test('Handle new window and tab on Practice Page',async({browser}) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
     //switch window
     const openWindBtn = await page.locator('button#openwindow');
     const [newWinPage] = await Promise.all([
@@ -48,7 +53,6 @@ test('Interact elements on Practice Page',async({browser}) => {
     ])
     await newWinPage.waitForLoadState('networkidle');
     expect(await newWinPage.locator('div.logo a[href="https://www.qaclickacademy.com"]')).toBeVisible();
-    //await newWinPage.close();
     //switch tab
     const openTabLink = await page.locator('fieldset a#opentab');
     const [newTabPage] = await Promise.all([
@@ -57,13 +61,100 @@ test('Interact elements on Practice Page',async({browser}) => {
     ])
     await newTabPage.waitForLoadState('networkidle');
     expect(await newTabPage.locator('div.logo a[href="https://www.qaclickacademy.com"]')).toBeVisible();
-    //await newTabPage.close();
-    //Alert handling
+})
+
+test('Handle Dialog Boxes',async({page})=> {
+    await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
+    //Alert and Confirm box handling
     const nameEditBox = await page.locator('input#name');
     const btnAlert = await page.locator('input#alertbtn');
+    const btnConfirm = page.locator('input#confirmbtn');
     await nameEditBox.fill('Tester');
+    await page.on('dialog',async dialog => {
+        const dialogMsg = await dialog.message();
+        assert(dialog.message().includes('Tester'));
+        if(dialogMsg.includes('Are you sure you want to confirm?')){
+            console.log(dialogMsg);
+            await dialog.dismiss();
+        }
+        else{
+            console.log(dialogMsg);
+            await dialog.dismiss();
+        }
+        
+    });
     await btnAlert.click();
-    //to be continued
+    await nameEditBox.fill('Tester');
+    await btnConfirm.click();
+})
+
+test('Interact with tables and web elements visibility',async({page})=>{
+    const coursePriceToVerify = ['JMETER','25'];
+    await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
+    //Web table
+    const courseTableRow = page.locator('table.table-display tr');
+    const numOfRows = await courseTableRow.count();
+
+    for(var i=1;i<=numOfRows;i++){
+        var courseNameRow = await courseTableRow.nth(i).locator('td').nth(1).textContent()
+        if(courseNameRow.includes(coursePriceToVerify[0])){
+            await courseTableRow.nth(i).scrollIntoViewIfNeeded();
+            expect(await courseTableRow.nth(i).locator('td').nth(2).textContent()).toBe(coursePriceToVerify[1]);
+            break;
+        }
+    }
+    //Fixed Header Table
+    const amountTableRow = page.locator('div.tableFixHead table tbody tr');
+    const totAmtStringLoc = page.locator('div.totalAmount');
+    var totalAmtCalculated = 0;
+    const amtTableRowCount = await amountTableRow.count();
+    for(var i=0;i<amtTableRowCount;i++){
+        var rowAmount = await amountTableRow.nth(i).locator('td').nth(3).textContent();
+        totalAmtCalculated = totalAmtCalculated + Number(rowAmount);
+    }
+    const totalAmountString = await totAmtStringLoc.textContent();
+    const totalAmountOnPage = totalAmountString.trim().split(' ')[3];
+    expect(totalAmtCalculated).toBe(Number(totalAmountOnPage));
+})
+
+test('Mouse hover menu interaction',async({page})=> {
+    await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
+    const mouseHoverButton = page.locator('button#mousehover');
+    const mouseHoverMenuOption = page.locator('div.mouse-hover-content');
+    await mouseHoverButton.scrollIntoViewIfNeeded();
+    await expect(page.locator('header a.blinkingText')).not.toBeInViewport();
+    await mouseHoverButton.hover();
+    await expect(mouseHoverMenuOption).toBeVisible();
+    await mouseHoverMenuOption.locator('a').first().click();
+    await expect(page.locator('header a.blinkingText')).toBeInViewport();
+})
+
+test('Verify webelement visibility',async({page}) => {
+    await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
+    //Check Element Hide / Show
+    const hideShowTextBox = page.locator('input#displayed-text');
+    const hideButton = page.locator('input#hide-textbox');
+    const showButton = page.locator('input#show-textbox');
+    await hideButton.scrollIntoViewIfNeeded();
+    await expect(hideShowTextBox).toBeVisible();
+    await hideButton.click();
+    await expect(hideShowTextBox).toBeHidden();
+    await showButton.click();
+    await expect(hideShowTextBox).toBeVisible();
+})
+
+test.only('Interact with iFrame',async({page}) => {
+    await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
+    const iFramePageElement = page.locator('iframe#courses-iframe');
+    const iFramePage = iFramePageElement.contentFrame();
+    
+    const mentroshipLink = iFramePage.locator('a.whitespace-nowrap[href*="mentorship"]:visible');
+    const titleTextLoc = iFramePage.locator('h1.leading-tight');
+    await iFramePage.locator('span.sr-only').click();
+    await mentroshipLink.click();
+    await iFramePageElement.scrollIntoViewIfNeeded();
+    expect(await titleTextLoc.textContent()).toContain('Get Personal Guidance');
+
 })
 
 test('Handle Date selection',async({page})=>{
