@@ -33,6 +33,7 @@ test('End to End Client App',async({browser}) => {
     //verify added item on cart page
     await cartButton.click();
     await page.waitForLoadState('networkidle');
+    await checkOutBtn.waitFor({state : 'visible'});
     const cartItemBool = await page.locator('h3:has-text('+itemToBuy+')')
     expect(cartItemBool).toBeTruthy();
     
