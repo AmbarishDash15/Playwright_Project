@@ -1,6 +1,6 @@
 const {test, expect} = require('@playwright/test')
 
-test('End to End Client App',async({browser}) => {
+test.only('End to End Client App',async({browser}) => {
     const itemToBuy = 'ADIDAS ORIGINAL'; //testdata
     const loginEmail = 'dash.ambarish15@gmail.com'; //test data
     const context = await browser.newContext();
@@ -15,6 +15,7 @@ test('End to End Client App',async({browser}) => {
     const cartButton = page.locator('button.btn-custom i.fa-shopping-cart');
     const cartItemName = page.locator('div.cartSection h3');
     const checkOutBtn = page.locator('li.totalRow button');
+    const cartSection = page.locator('div.cart');
     //entring credentials and logging in
     await eMailField.fill(loginEmail);
     await passwordField.fill('Password@123');
@@ -33,11 +34,9 @@ test('End to End Client App',async({browser}) => {
     //verify added item on cart page
     await page.getByText('Product Added To Cart').waitFor({state:'hidden'});
     await cartButton.click();
-    await page.waitForLoadState('networkidle');
-    await checkOutBtn.waitFor({state : 'visible'});
-    const cartItemBool = await page.locator('h3:has-text('+itemToBuy+')')
-    expect(cartItemBool).toBeTruthy();
-    
+    await cartSection.waitFor({state : 'visible'});
+    expect(await cartItemName.textContent()).toContain(itemToBuy);
+        
     //go to check out page and fill details
     const creditCardNoField = page.locator('div.form__cc input').first();
     const expDateMonth = page.locator('select.input').first();
