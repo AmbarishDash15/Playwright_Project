@@ -32,6 +32,7 @@ test('End to End Client App',async({browser}) => {
     }
     //verify added item on cart page
     await cartButton.click();
+    await page.waitForLoadState('networkidle');
     const cartItemBool = await page.locator('h3:has-text('+itemToBuy+')')
     expect(cartItemBool).toBeTruthy();
     
@@ -68,6 +69,7 @@ test('End to End Client App',async({browser}) => {
     //interacting with type-ahead combobox
     await countryInputField.pressSequentially(country,{delay: 100}); 
     await countryList.waitFor();
+    await countryListItem.last().waitFor();
     const countryCount = await countryListItem.count();
     for(var i = 0;i < countryCount;i++){
         const countryName = await countryListItem.nth(i).textContent();
