@@ -1,27 +1,27 @@
-const {test, expect} = require('@playwright/test')
+const {test,expect,request} = require('@playwright/test');
+const loginEmail = 'dash.ambarish15@gmail.com';
+const countryToSelect = 'India';
+const loginPayload = {userEmail:loginEmail,userPassword:'Password@123'};
+const orderPayLoad = {orders:[{country:countryToSelect,productOrderedId:'68a961459320a140fe1ca57a'}]};
+var token;
+var orderID;
 
-test('End to End Client App',async({browser}) => {
-    const itemToBuy = 'ADIDAS ORIGINAL'; //testdata
-    const loginEmail = 'dash.ambarish15@gmail.com'; //test data
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    //opening application url
+test.beforeAll(async() => {
+    const APIContext = await request.newContext({ignoreHTTPSErrors: true});
+    const APIResponse = await APIContext.post('https://rahulshettyacademy.com/api/ecom/auth/login',{data: loginPayload});
+    expect(APIResponse.ok()).toBeTruthy();
+    const loginResponseJson = await APIResponse.json();
+    token = loginResponseJson.token;
+})
+test('End to End using API Login', async({page}) => {
+    const itemToBuy = 'ADIDAS ORIGINAL';
+    await page.addInitScript(value => {
+        window.localStorage.setItem('token',value);
+    },token);
     await page.goto('https://rahulshettyacademy.com/client');
-    await page.waitForLoadState('networkidle'); //waiting for network to be stable
-    const eMailField = page.locator('#userEmail');
-    const passwordField = page.locator('#userPassword');
-    const loginButton = page.locator('#login');
     const itemNameList = page.locator('div.card-body');
     const cartButton = page.locator('button.btn-custom i.fa-shopping-cart');
-    const cartItemName = page.locator('div.cartSection h3');
     const checkOutBtn = page.locator('li.totalRow button');
-    //entring credentials and logging in
-    await eMailField.fill(loginEmail);
-    await passwordField.fill('Password@123');
-    await loginButton.click();
-    //waiting for first element on home page
-    await itemNameList.first().waitFor();
-    //taking count and looping through elements 
     const itemCount = await itemNameList.count();
     for(var i = 1;i <= itemCount;i++){
         if(await itemNameList.nth(i).locator('b').textContent() === itemToBuy){
@@ -35,7 +35,7 @@ test('End to End Client App',async({browser}) => {
     await page.waitForLoadState('networkidle');
     const cartItemBool = await page.locator('h3:has-text('+itemToBuy+')')
     expect(cartItemBool).toBeTruthy();
-    
+
     //go to check out page and fill details
     const creditCardNoField = page.locator('div.form__cc input').first();
     const expDateMonth = page.locator('select.input').first();
@@ -55,7 +55,6 @@ test('End to End Client App',async({browser}) => {
     const ccCVV = '123';
     const ccNameOnCard = 'Tester';
     const couponToApply = 'rahulshettyacademy';
-    const country = 'India';
 
     await checkOutBtn.click();
     await creditCardNoField.clear();
@@ -67,13 +66,13 @@ test('End to End Client App',async({browser}) => {
     expect(await emailFieldChkOut.inputValue()).toBe(loginEmail);
 
     //interacting with type-ahead combobox
-    await countryInputField.pressSequentially(country,{delay: 100}); 
-    await countryList.waitFor();
-    await countryListItem.last().waitFor();
+    await countryInputField.pressSequentially(countryToSelect,{delay: 100}); 
+    await countryList.waitFor({state : 'visible'});
+    await countryListItem.last().waitFor({state : 'visible'});
     const countryCount = await countryListItem.count();
     for(var i = 0;i < countryCount;i++){
         const countryName = await countryListItem.nth(i).textContent();
-        if(countryName.trim() === country){
+        if(countryName.trim() === countryToSelect){
             await countryListItem.nth(i).click();
             break;
         }
@@ -115,9 +114,58 @@ test('End to End Client App',async({browser}) => {
     const deliveryAddress = page.locator('div.address').last();
     const orderSummItemName = page.locator('div.title');
     await page.waitForLoadState('networkidle');
+    await orderSummaryLabel.waitFor({state: 'visible'});
     expect(await orderSummaryLabel.textContent()).toContain('order summary');
     expect(await orderSummOrderID.textContent()).toContain(orderID);
     expect(await deliveryAddress.locator('p.text').first().textContent()).toContain(loginEmail);
-    expect(await deliveryAddress.locator('p.text').last().textContent()).toContain(country);
+    expect(await deliveryAddress.locator('p.text').last().textContent()).toContain(countryToSelect);
+    expect(await orderSummItemName.textContent()).toContain(itemToBuy);
+})
+
+test('Login and Order with API and order UI Validation',async({page}) => {
+    const itemToBuy = 'ZARA COAT 3';
+    await page.addInitScript(value => {
+        window.localStorage.setItem('token',value);
+    },token);
+    const APIContext = await request.newContext({ignoreHTTPSErrors: true});
+    const APIOrderResponse = await APIContext.post('https://rahulshettyacademy.com/api/ecom/order/create-order',
+        {
+            data: orderPayLoad,
+            headers: {
+                'Authorization' : token,
+                'Content-Type' : 'application/json'
+            }
+        }
+    )
+    await expect(APIOrderResponse.ok).toBeTruthy();
+    const orderResponseJson = await APIOrderResponse.json();
+    orderID = orderResponseJson.orders[0];
+    //Go to application and order page
+    await page.goto('https://rahulshettyacademy.com/client');
+    const ordersBtn = page.getByRole('button',{name: 'ORDERS'});
+    await ordersBtn.click();
+    await page.waitForLoadState('networkidle');
+    expect(await page.locator('h1.ng-star-inserted').textContent()).toContain('Your Orders');
+    const orderRows = page.locator('tr.ng-star-inserted');
+    const orderCount = await orderRows.count();
+    //Search for orders based on ORDER ID in table and click on Order details
+    for (var i = 0;i<=orderCount;i++){
+        if(await orderRows.nth(i).locator('th').textContent() === orderID){
+            orderRows.nth(i).locator('button.btn-primary').click();
+            break;
+        }
+    }
+
+    //verify order id on order details page
+
+    const orderSummaryLabel = page.locator('div.email-title');
+    const orderSummOrderID = page.locator('div.col-text');
+    const deliveryAddress = page.locator('div.address').last();
+    const orderSummItemName = page.locator('div.title');
+    await page.waitForLoadState('networkidle');
+    expect(await orderSummaryLabel.textContent()).toContain('order summary');
+    expect(await orderSummOrderID.textContent()).toContain(orderID);
+    expect(await deliveryAddress.locator('p.text').first().textContent()).toContain(loginEmail);
+    expect(await deliveryAddress.locator('p.text').last().textContent()).toContain(countryToSelect);
     expect(await orderSummItemName.textContent()).toContain(itemToBuy);
 })

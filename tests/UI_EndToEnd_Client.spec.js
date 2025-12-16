@@ -1,24 +1,27 @@
-const {test,expect,request} = require('@playwright/test');
-const loginEmail = 'dash.ambarish15@gmail.com';
-const loginPayload = {userEmail:loginEmail,userPassword:"Password@123"}
-var token;
+const {test, expect} = require('@playwright/test')
 
-test.beforeAll(async() => {
-    const APIContext = await request.newContext({ignoreHTTPSErrors: true});
-    const APIResponse = await APIContext.post('https://rahulshettyacademy.com/api/ecom/auth/login',{data: loginPayload});
-    expect(APIResponse.ok()).toBeTruthy();
-    const loginResponseJson = await APIResponse.json();
-    token = loginResponseJson.token;
-})
-test('Place order using API Login', async({page}) => {
-    const itemToBuy = 'ADIDAS ORIGINAL';
-    await page.addInitScript(value => {
-        window.localStorage.setItem('token',value);
-    },token);
+test('End to End Client App',async({browser}) => {
+    const itemToBuy = 'ADIDAS ORIGINAL'; //testdata
+    const loginEmail = 'dash.ambarish15@gmail.com'; //test data
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    //opening application url
     await page.goto('https://rahulshettyacademy.com/client');
+    await page.waitForLoadState('networkidle'); //waiting for network to be stable
+    const eMailField = page.locator('#userEmail');
+    const passwordField = page.locator('#userPassword');
+    const loginButton = page.locator('#login');
     const itemNameList = page.locator('div.card-body');
     const cartButton = page.locator('button.btn-custom i.fa-shopping-cart');
+    const cartItemName = page.locator('div.cartSection h3');
     const checkOutBtn = page.locator('li.totalRow button');
+    //entring credentials and logging in
+    await eMailField.fill(loginEmail);
+    await passwordField.fill('Password@123');
+    await loginButton.click();
+    //waiting for first element on home page
+    await itemNameList.first().waitFor();
+    //taking count and looping through elements 
     const itemCount = await itemNameList.count();
     for(var i = 1;i <= itemCount;i++){
         if(await itemNameList.nth(i).locator('b').textContent() === itemToBuy){
@@ -32,7 +35,7 @@ test('Place order using API Login', async({page}) => {
     await page.waitForLoadState('networkidle');
     const cartItemBool = await page.locator('h3:has-text('+itemToBuy+')')
     expect(cartItemBool).toBeTruthy();
-
+    
     //go to check out page and fill details
     const creditCardNoField = page.locator('div.form__cc input').first();
     const expDateMonth = page.locator('select.input').first();
@@ -65,8 +68,8 @@ test('Place order using API Login', async({page}) => {
 
     //interacting with type-ahead combobox
     await countryInputField.pressSequentially(country,{delay: 100}); 
-    await countryList.waitFor();
-    await countryListItem.last().waitFor();
+    await countryList.waitFor({state : 'visible'});
+    await countryListItem.last().waitFor({state : 'visible'});
     const countryCount = await countryListItem.count();
     for(var i = 0;i < countryCount;i++){
         const countryName = await countryListItem.nth(i).textContent();
@@ -112,6 +115,7 @@ test('Place order using API Login', async({page}) => {
     const deliveryAddress = page.locator('div.address').last();
     const orderSummItemName = page.locator('div.title');
     await page.waitForLoadState('networkidle');
+    await orderSummaryLabel.waitFor({state: 'visible'});
     expect(await orderSummaryLabel.textContent()).toContain('order summary');
     expect(await orderSummOrderID.textContent()).toContain(orderID);
     expect(await deliveryAddress.locator('p.text').first().textContent()).toContain(loginEmail);
