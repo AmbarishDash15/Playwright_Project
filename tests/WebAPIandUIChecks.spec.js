@@ -92,7 +92,7 @@ test('End to End using API Login', async({page}) => {
     expect(await orderConfirmationLabel.textContent()).toContain('Thankyou for the order');
     const orderIDFull = await orderIDField.textContent();
     const orderID = orderIDFull.trim().split(' ')[1];
-    const ordersBtn = page.getByRole('button',{name: 'ORDERS'});
+    const ordersBtn = page.locator('button[routerlink*="/myorders"]');
     expect(await prodNameConfPage.textContent()).toBe(itemToBuy);
 
     //Go to Orders page and verify order
@@ -144,7 +144,7 @@ test('Login and Order with API and order UI Validation',async({page}) => {
     orderID = orderResponseJson.orders[0];
     //Go to application and order page
     await page.goto('https://rahulshettyacademy.com/client');
-    const ordersBtn = page.getByRole('button',{name: 'ORDERS'});
+    const ordersBtn = page.locator('button[routerlink*="/myorders"]');
     await ordersBtn.click();
     await page.waitForLoadState('networkidle');
     expect(await page.locator('h1.ng-star-inserted').textContent()).toContain('Your Orders');

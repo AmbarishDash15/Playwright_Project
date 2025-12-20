@@ -92,7 +92,7 @@ test('End to End Client App',async({browser}) => {
     expect(await orderConfirmationLabel.textContent()).toContain('Thankyou for the order');
     const orderIDFull = await orderIDField.textContent();
     const orderID = orderIDFull.trim().split(' ')[1];
-    const ordersBtn = page.getByRole('button',{name: 'ORDERS'});
+    const ordersBtn = page.locator('button[routerlink*="/myorders"]');
     expect(await prodNameConfPage.textContent()).toBe(itemToBuy);
 
     //Go to Orders page and verify order

@@ -20,7 +20,7 @@ test('API and UI validation using util',async ({page}) => {
     const orderID = utilsAPIResponse.orderID;
     //Go to application and order page
     await page.goto('https://rahulshettyacademy.com/client');
-    const ordersBtn = page.getByRole('button',{name: 'ORDERS'});
+    const ordersBtn = page.locator('button[routerlink*="/myorders"]');
     await ordersBtn.click();
     await page.waitForLoadState('networkidle');
     expect(await page.locator('h1.ng-star-inserted').textContent()).toContain('Your Orders');
