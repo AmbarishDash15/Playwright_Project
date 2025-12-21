@@ -1,8 +1,8 @@
 const {test, expect} = require('@playwright/test')
 
-test.only('End to End Client App',async({browser}) => {
+test('End to End Client App',async({browser}) => {
     const itemToBuy = 'ZARA COAT 3'; //testdata
-    const loginEmail = 'dash.ambarish15@gmail.com'; //test data
+    const loginEmail = 'dash.ambarish15+second@gmail.com'; //test data
     const context = await browser.newContext();
     const page = await context.newPage();
     //opening application url

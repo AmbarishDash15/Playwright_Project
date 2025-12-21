@@ -1,6 +1,6 @@
 const{test, expect, request} = require('@playwright/test');
 const{APIUtils} = require('./utils/APIUtils');
-const loginEmail = 'dash.ambarish15@gmail.com';
+const loginEmail = 'dash.ambarish15+first@gmail.com';
 const countryToSelect = 'India';
 const loginPayload = {userEmail:loginEmail,userPassword:'Password@123'};
 const orderPayLoad = {orders:[{country:countryToSelect,productOrderedId:'68a961459320a140fe1ca57a'}]};

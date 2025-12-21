@@ -25,7 +25,7 @@ test('End to End using API Login', async({page}) => {
     const cartItem = page.locator('div li');
     const cartItemName = page.locator('div.cartSection h3');
     const itemCount = await itemNameList.count();
-    for(var i = 1;i <= itemCount;i++){
+    for(var i = 0;i < itemCount;i++){
         if(await itemNameList.nth(i).locator('b').textContent() === itemToBuy){
             await itemNameList.nth(i).locator('button.w-10').click();
             await expect(page.getByText('Product Added To Cart')).toBeVisible(); //verify success message on screen
