@@ -13,10 +13,7 @@ class MiscUtils {
             }
         }
         catch (err) {
-            if (err.code === 'ENOENT') {
-                console.log('File does not exist, skipping deletion.');
-            }
-            else {
+            if (err.code != 'ENOENT') {
                 console.error('Error deleting the file:', err);
             }
         }
