@@ -1,4 +1,4 @@
-const {test, expect} = require('@playwright/test')
+const {test, expect} = require('@playwright/test');
 
 test('End to End Client App @UI',async({browser}) => {
     const itemToBuy = 'ZARA COAT 3'; //testdata
@@ -6,7 +6,7 @@ test('End to End Client App @UI',async({browser}) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     //opening application url
-    await page.goto('https://rahulshettyacademy.com/client');
+    await page.goto('https://rahulshettyacademy.com/client/#/auth/login');
     await page.waitForLoadState('networkidle'); //waiting for network to be stable
     const eMailField = page.locator('#userEmail');
     const passwordField = page.locator('#userPassword');
