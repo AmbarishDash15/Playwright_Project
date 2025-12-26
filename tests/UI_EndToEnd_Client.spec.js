@@ -99,16 +99,15 @@ test('End to End Client App @UI',async({browser}) => {
     //Go to Orders page and verify order
     await ordersBtn.click();
     await page.waitForLoadState('networkidle');
-    await expect( page.locator('h1.ng-star-inserted')).toContainText('Your Orders');
-    const orderRows = page.locator('tr.ng-star-inserted');
-    const orderCount = await orderRows.count();
+    const orderTable = page.locator('table tbody');
+    await orderTable.waitFor({state: 'attached'});
+    expect(await page.locator('h1.ng-star-inserted').textContent()).toContain('Your Orders');
     //Search for orders based on ORDER ID in table and click on Order details
-    for (var i = 0;i<=orderCount;i++){
-        if(await orderRows.nth(i).locator('th').textContent() === orderID){
-            orderRows.nth(i).locator('button.btn-primary').click();
-            break;
-        }
-    }
+    
+    const orderIDCell = page.locator('th',{hasText:orderID});
+    const rowOrder = page.locator('tr',{has: orderIDCell});
+    const viewBtn = rowOrder.locator('button',{hasText:'View'});
+    await viewBtn.click();
 
     //verify order id on order details page
 

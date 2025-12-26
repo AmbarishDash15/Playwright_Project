@@ -23,16 +23,15 @@ test('API and UI validation using util @APInUI',async ({page}) => {
     const ordersBtn = page.locator('button[routerlink*="/myorders"]');
     await ordersBtn.click();
     await page.waitForLoadState('networkidle');
+    const orderTable = page.locator('table tbody');
+    await orderTable.waitFor({state: 'attached'});
     expect(await page.locator('h1.ng-star-inserted').textContent()).toContain('Your Orders');
-    const orderRows = page.locator('tr.ng-star-inserted');
-    const orderCount = await orderRows.count();
     //Search for orders based on ORDER ID in table and click on Order details
-    for (var i = 0;i<=orderCount;i++){
-        if(await orderRows.nth(i).locator('th').textContent() === orderID){
-            orderRows.nth(i).locator('button.btn-primary').click();
-            break;
-        }
-    }
+    
+    const orderIDCell = page.locator('th',{hasText:orderID});
+    const rowOrder = page.locator('tr',{has: orderIDCell});
+    const viewBtn = rowOrder.locator('button',{hasText:'View'});
+    await viewBtn.click();
 
     //verify order id on order details page
 
