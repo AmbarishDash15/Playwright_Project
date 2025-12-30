@@ -15,9 +15,12 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@azure/identity": "^4.13.0",
+    "@azure/playwright": "^1.0.0",
     "@playwright/test": "^1.57.0",
     "@types/node": "^24.7.0",
     "allure-playwright": "^3.4.3",
+    "dotenv": "^17.2.3",
     "playwright": "^1.57.0"
   },
   "dependencies": {
