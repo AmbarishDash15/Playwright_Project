@@ -145,14 +145,15 @@ test('Verify webelement visibility @SmokeUI',async({page}) => {
 test('Interact with iFrame @SmokeUI',async({page}) => {
     await page.goto('https://rahulshettyacademy.com/AutomationPractice/');
     const iFramePageElement = page.locator('iframe#courses-iframe');
-    const iFramePage = iFramePageElement.contentFrame();
-    
-    const mentroshipLink = iFramePage.locator('a.whitespace-nowrap[href*="mentorship"]:visible');
-    const titleTextLoc = iFramePage.locator('h1.leading-tight');
-    await iFramePage.locator('span.sr-only').click();
-    await mentroshipLink.click();
     await iFramePageElement.scrollIntoViewIfNeeded();
-    expect(await titleTextLoc.textContent()).toContain('Get Personal Guidance');
+    const iFramePage = iFramePageElement.contentFrame();
+    const lifetimeAccessLink = iFramePage.locator('a.new-navbar-highlighter[href*="lifetime-access"]');
+    const titleTextLoc = iFramePage.locator('div.inner-box h1');
+    if(await iFramePage.locator('span.sr-only').isVisible(5*1000)){
+        await iFramePage.locator('span.sr-only').click();
+    }
+    await lifetimeAccessLink.click();
+    expect(await titleTextLoc.textContent()).toContain('All Access Subscription');
 
 })
 
